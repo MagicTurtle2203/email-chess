@@ -1,16 +1,14 @@
-import _chess.io
 import base64
-import mail.mail as mail
-import mail.templates as templates
 import random
 import re
 import time
 
-import json
+from cs   import chess_io
+from mail import mail
+from mail import templates
 
 
 def parse_mail(msg) -> None:
-    # print(json.dumps(msg))
     messages = []
 
     header_dict = {header['name']:header['value'] for header in msg['payload']['headers']}

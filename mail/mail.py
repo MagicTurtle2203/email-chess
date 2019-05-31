@@ -56,8 +56,6 @@ def create_mail(to: str, subject: str, message_text: str, reply_to: {str: str} =
         else:
             message['References'] = reply_to['Message-ID']
 
-    print(message.as_string())
-
     b64_bytes = base64.urlsafe_b64encode(message.as_bytes())
     b64_string = b64_bytes.decode()
 
