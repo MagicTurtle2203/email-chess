@@ -1,7 +1,4 @@
 import base64
-import json
-import re
-import templates
 
 from email.mime.text import MIMEText
 from googleapiclient.discovery import build
@@ -45,7 +42,7 @@ def create_mail(to: str, subject: str, message_text: str, reply_to: {str: str} =
     message['from'] = 'emailchessraff@gmail.com'
     message['subject'] = subject
 
-    if reply_to != {}:
+    if reply_to:
         message['threadId'] = reply_to['threadId']
         message['Message-ID'] = reply_to['Message-ID']
         
@@ -59,6 +56,8 @@ def create_mail(to: str, subject: str, message_text: str, reply_to: {str: str} =
         else:
             message['References'] = reply_to['Message-ID']
 
+    print(message.as_string())
+
     b64_bytes = base64.urlsafe_b64encode(message.as_bytes())
     b64_string = b64_bytes.decode()
 
@@ -71,18 +70,7 @@ def main():
     creds = get_credentials()
     service = build('gmail', 'v1', http=creds.authorize(Http()))
 
-    for msg in get_mail(service):
-        threadId = msg['threadId']
-
-        header_dict = {header['name']:header['value'] for header in msg['payload']['headers']}
-        
-        reply_dict = {'threadId': threadId}
-        reply_dict.update(header_dict)
-
-        first_name, last_name, addr = re.search(r'(?:(\w+)\s+(\w+))\s+<(\w+@\w+\.\w+)>', header_dict['From']).groups()
-
-        new_msg = create_mail(addr, header_dict['Subject'], templates.REPLY.format(first_name), reply_dict)
-        service.users().messages().send(userId = 'me', body = new_msg).execute()
+    return service
     
 
 if __name__ == '__main__':

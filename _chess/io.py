@@ -43,6 +43,7 @@ def create(white: str, black: str) -> None:
         json.dump(games, f)
         f.truncate()
 
+
 def delete(email1: str, email2: str) -> None:
     with open(PATH, 'r+') as f:
         games = json.load(f)
@@ -54,6 +55,7 @@ def delete(email1: str, email2: str) -> None:
         f.seek(0)
         json.dump(games, f)
         f.truncate()
+
 
 def read(email1: str, email2: str) -> chess.Board:
     with open(PATH, 'r') as f:
@@ -71,6 +73,7 @@ def read(email1: str, email2: str) -> chess.Board:
 
     return board
 
+
 def write(email1: str, email2: str, board: chess.Board) -> None:
     with open(PATH, 'r+') as f:
         games = json.load(f)
@@ -86,6 +89,7 @@ def write(email1: str, email2: str, board: chess.Board) -> None:
         f.seek(0)
         json.dump(games, f)
         f.truncate()
+
 
 def _hash(*args: str) -> str:
     total = 0
