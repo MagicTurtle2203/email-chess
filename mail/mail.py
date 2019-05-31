@@ -33,7 +33,9 @@ def get_mail(service):
     if messages:
         for message in messages:
             msg = service.users().messages().get(userId='me', id=message['id']).execute()
-            service.users().messages().modify(userId='me', id=message['id'], body={'removeLabelIds': ['UNREAD'], 'addLabelIds': []}).execute()
+            service.users().messages().modify(
+                userId='me', id=message['id'], body={'removeLabelIds': ['UNREAD'], 'addLabelIds': []}
+            ).execute()
             yield msg
 
 
@@ -72,29 +74,14 @@ def main():
     for msg in get_mail(service):
         threadId = msg['threadId']
 
-        references = ''
-        in_reply_to = ''
-
-        for header in msg['payload']['headers']:
-            if header['name'] == 'From':
-                name, _, addr = re.search(r'(?:(\w+)\s+(\w+))\s+<(\w+@\w+\.\w+)>', header['value']).groups()
-            elif header['name'] == 'Subject':
-                subject = header['value']
-            elif header['name'] == 'Message-ID':
-                message_id = header['value']
-            elif header['name'] == 'References':
-                references = header['value']
-            elif header['name'] == 'In-Reply-To':
-                in_reply_to = header['value']
+        header_dict = {header['name']:header['value'] for header in msg['payload']['headers']}
         
-        reply_dict = {'threadId': threadId, 'Message-ID': message_id}
+        reply_dict = {'threadId': threadId}
+        reply_dict.update(header_dict)
 
-        if references != '':
-            reply_dict['References'] = references
-        if in_reply_to != '':
-            reply_dict['In-Reply-To'] = in_reply_to
+        first_name, last_name, addr = re.search(r'(?:(\w+)\s+(\w+))\s+<(\w+@\w+\.\w+)>', header_dict['From']).groups()
 
-        new_msg = create_mail(addr, subject, templates.REPLY.format(name), reply_dict)
+        new_msg = create_mail(addr, header_dict['Subject'], templates.REPLY.format(first_name), reply_dict)
         service.users().messages().send(userId = 'me', body = new_msg).execute()
     
 
