@@ -12,11 +12,11 @@ SCOPES = 'https://www.googleapis.com/auth/gmail.modify'
 
 
 def get_credentials():
-    store = file.Storage(ABS_PATH / 'token.json')
+    store = file.Storage(ABS_PATH / 'data/token.json')
     creds = store.get()
 
     if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets(ABS_PATH / 'client_secrets.json', SCOPES)
+        flow = client.flow_from_clientsecrets(ABS_PATH / 'data/client_secrets.json', SCOPES)
         creds = tools.run_flow(flow, store)
         store.put(creds)
     
@@ -64,13 +64,8 @@ def create_mail(to: str, subject: str, message_text: str, reply_to: {str: str} =
     return raw_message
 
 
-def main():
+def get_service():
     creds = get_credentials()
     service = build('gmail', 'v1', http=creds.authorize(Http()))
 
     return service
-    
-
-if __name__ == '__main__':
-    main()
-

@@ -3,10 +3,13 @@ import chess.pgn
 import datetime
 import io
 import json
+
 from pathlib import Path
 
 
-PATH = Path('data/games.json')
+PATH = Path().resolve() / 'cs' / Path('data/store.json')
+
+STR_TO_DATE_FORMAT = r'%Y-%m-%d %H:%M:%S.%f'
 
 GEMATRIA = {
     'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6, 'g': 7, 'h': 8, 'i': 9,
@@ -20,7 +23,7 @@ GEMATRIA = {
 }
 
 
-def create(white: str, black: str) -> None:
+def create(white: str, black: str, listen: 'threadId') -> None:
     game = chess.pgn.Game()
     game.headers['Event'] = 'E-Mail Game'
     game.headers['Site'] = 'Online'
@@ -35,9 +38,13 @@ def create(white: str, black: str) -> None:
         key = _hash(white, black)
         
         games[key] = {}
-        games[key]['white'] = white
-        games[key]['black'] = black
-        games[key]['pgn'] = str(game)
+        games[key]['start_date'] = str(datetime.datetime.today())
+        games[key]['status'] = 'waiting'
+        games[key]['listen'] = listen
+        games[key]['game'] = {}
+        games[key]['game']['white'] = white
+        games[key]['game']['black'] = black
+        games[key]['game']['pgn'] = str(game)
 
         f.seek(0)
         json.dump(games, f)
@@ -103,3 +110,4 @@ def _hash(*args: str) -> str:
             total += 1
 
     return str(total * len(com))
+
